@@ -13,14 +13,14 @@ Para evolucionar el proyecto hacia una aplicación de escritorio completa en C# 
                             v
 +--------------------------------------------------------+
 |         Capa de Lógica de Negocio (Domain)             |
-|      - Clases de C# (Jugador, Explorador, Misión)     |
-|      - Reglas del Juego (Costo de Energía, Eventos)   |
+|      - Clases de C# (Jugador, Explorador, Misión)      |
+|      - Reglas del Juego (Costo de Energía, Eventos)    |
 +---------------------------+----------------------------+
                             |
                             v
 +--------------------------------------------------------+
 |      Capa de Acceso a Datos (DAL / Persistence)        |
-|      - Patrón Repository / Consultas SQL              |
+|      - Patrón Repository / Consultas SQL               |
 |      - Mapeo de Objetos a Tablas                       |
 +---------------------------+----------------------------+
                             |
