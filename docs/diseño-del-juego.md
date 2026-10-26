@@ -35,12 +35,12 @@ La motivación principal del jugador radica en la toma de decisiones estratégic
 │                                           │
 ▼                                           │
 [Resolución de Misión]                              │
-├── Éxito ──► [Obtención de Recompensas / Ítems] ──┤
-└── Fracaso ──► [Pérdida de Energía / Recursos] ──┤
+├── Éxito ──► [Obtención de Recompensas / Ítems] ───┤
+└── Fracaso ──► [Pérdida de Energía / Recursos] ────┤
 │
 [¿Energía == 0?] ──Sí──► [Fin de Partida (Derrota)] │
 │                                           │
-No ──────────────────────────────────────────┘
+No ─────────────────────────────────────────┘
 
 ```
 
