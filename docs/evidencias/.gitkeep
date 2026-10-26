@@ -1,0 +1,8 @@
+docs/
+ ├── diseno-del-juego.md
+ ├── arquitectura-actual.md
+ ├── arquitectura-propuesta.md
+ ├── modelo-de-datos-propuesto.md
+ ├── analisis-tecnico.md
+ └── evidencias/
+      └── [bocetos y diagramas]
