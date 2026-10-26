@@ -7,27 +7,26 @@ Para evolucionar el proyecto hacia una aplicación de escritorio completa en C# 
 │      - Formularios de C# Windows Forms                 │
 │      - Mapa Gráfico, Pantalla de Misiones e Inventario │
 └───────────────────────────┬────────────────────────────┘
-│
-▼
+                            │
+                            ▼
 ┌────────────────────────────────────────────────────────┐
 │         Capa de Lógica de Negocio (Domain)             │
 │      - Clases de C# (Jugador, Explorador, Misión)     │
 │      - Reglas del Juego (Costo de Energía, Eventos)   │
 └───────────────────────────┬────────────────────────────┘
-│
-▼
+                            │
+                            ▼
 ┌────────────────────────────────────────────────────────┐
 │      Capa de Acceso a Datos (DAL / Persistence)        │
 │      - Patrón Repository / Consultas SQL              │
 │      - Mapeo de Objetos a Tablas                       │
 └───────────────────────────┬────────────────────────────┘
-│
-▼
+                            │
+                            ▼
 ┌────────────────────────────────────────────────────────┐
 │            Base de Datos (SQL Server)                  │
 │      - Tablas: Jugador, Inventario, Misiones           │
 └────────────────────────────────────────────────────────┘
----
 
 ## 2. Descripción de Componentes
 
