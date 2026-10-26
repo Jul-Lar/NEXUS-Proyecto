@@ -43,4 +43,4 @@ Toda la documentación técnica y de diseño requerida para la evolución de NEX
 
 1. **Clonar el repositorio:**
    ```bash
-   git clone [https://github.com/Jul-Lar/NEXUS-Proyecto.git](https://github.com/Jul-Lar/NEXUS-Proyecto.git)
+   git clone https://github.com/Jul-Lar/NEXUS-Proyecto.git
