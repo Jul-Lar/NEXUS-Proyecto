@@ -154,7 +154,7 @@ namespace NexusForms
 
     public static class ServicioIA
     {
-        private static readonly string ApiKey = "TU_API_KEY_AQUI";
+        private static readonly string ApiKey = "TU_API_KEY_AQUI";s
         private static readonly HttpClient client = CrearClienteRapido();
         private static readonly Random randIA = new Random();
         private static readonly object lockVoz = new object();
