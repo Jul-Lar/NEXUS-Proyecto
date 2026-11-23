@@ -154,7 +154,7 @@ namespace NexusForms
 
     public static class ServicioIA
     {
-        private static readonly string ApiKey = "TU_API_KEY_AQUI";s
+        private static readonly string apiKey = Environment.GetEnvironmentVariable("NEXUS_API_KEY") ?? "";
         private static readonly HttpClient client = CrearClienteRapido();
         private static readonly Random randIA = new Random();
         private static readonly object lockVoz = new object();
@@ -194,7 +194,7 @@ namespace NexusForms
 
         public static async Task<string> ConsultarGeminiAsync(Jugador j, string pregunta)
         {
-            string clave = ApiKey.Trim();
+            string clave = apiKey.Trim();
             string contexto = $"Eres IRIS, la IA de a bordo de la nave {j.NaveAsignada} en el juego NEXUS. " +
                               $"Piloto: {j.Nombre}, Sector: {j.RealidadAsignada}, Energía: {j.NivelEnergia}%, " +
                               $"Estabilidad: {j.NivelEstabilidad}%, Peligro: {j.NivelPeligro}%, Fragmentos: {j.FragmentosDatos}. " +
