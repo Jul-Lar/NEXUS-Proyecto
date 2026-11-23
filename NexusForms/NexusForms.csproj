@@ -24,7 +24,6 @@
 	  <None Remove="Assets\mapa_tactico_nebula-x9.jpg" />
 	  <None Remove="Assets\mapa_tactico_void-00.jpg" />
 	  <None Remove="Assets\musica.wav" />
-	  <None Remove="Assets\musica.wav.wav" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -68,9 +67,6 @@
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="Assets\musica.wav">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="Assets\musica.wav.wav">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	</ItemGroup>
