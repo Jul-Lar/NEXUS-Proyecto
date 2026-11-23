@@ -27,7 +27,15 @@ namespace NexusForms
             try
             {
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-                string[] candidatos = Directory.GetFiles(baseDir, "musica*.*");
+                string assetsDir = Path.Combine(baseDir, "Assets");
+
+                List<string> listaCandidatos = new List<string>();
+                if (Directory.Exists(assetsDir))
+                    listaCandidatos.AddRange(Directory.GetFiles(assetsDir, "musica*.*"));
+                if (Directory.Exists(baseDir))
+                    listaCandidatos.AddRange(Directory.GetFiles(baseDir, "musica*.*"));
+
+                string[] candidatos = listaCandidatos.ToArray();
 
                 if (candidatos.Length == 0)
                 {
@@ -131,13 +139,17 @@ namespace NexusForms
                 return;
             }
 
-            string rutaFondo = Path.Combine(baseDir, nombreArchivo);
+            string rutaAssets = Path.Combine(baseDir, "Assets", nombreArchivo);
+            string rutaRaiz = Path.Combine(baseDir, nombreArchivo);
+            string rutaFondo = File.Exists(rutaAssets) ? rutaAssets : rutaRaiz;
+
             if (File.Exists(rutaFondo))
             {
                 try
                 {
                     pnlMapa.BackgroundImage?.Dispose();
-                    pnlMapa.BackgroundImage = Image.FromFile(rutaFondo);
+                    using var fs = new FileStream(rutaFondo, FileMode.Open, FileAccess.Read);
+                    pnlMapa.BackgroundImage = Image.FromStream(fs);
                     pnlMapa.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
                 }
                 catch

@@ -191,21 +191,34 @@ namespace NexusForms
 
         private void IntentarCargarImagenFondo()
         {
-            string[] posiblesRutas =
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string[] nombresArchivo =
             {
                 "fondo_espacio.jpg", "fondo_espacio.png", "espacio.jpg", "espacio.png",
-                "galaxia.jpg", "galaxia.png", "space.jpg", "space.png",
-                Path.Combine("Resources", "fondo_espacio.jpg"),
-                Path.Combine("Resources", "espacio.jpg"),
-                Path.Combine("Assets", "espacio.png")
+                "galaxia.jpg", "galaxia.png", "space.jpg", "space.png"
             };
 
-            foreach (string ruta in posiblesRutas)
+            foreach (string nombre in nombresArchivo)
             {
-                if (File.Exists(ruta))
+                string[] rutas =
                 {
-                    try { fondoEspacialExterno = Image.FromFile(ruta); break; }
-                    catch { }
+                    Path.Combine(baseDir, "Assets", nombre),
+                    Path.Combine(baseDir, "Resources", nombre),
+                    Path.Combine(baseDir, nombre)
+                };
+
+                foreach (string ruta in rutas)
+                {
+                    if (File.Exists(ruta))
+                    {
+                        try
+                        {
+                            using var fs = new FileStream(ruta, FileMode.Open, FileAccess.Read);
+                            fondoEspacialExterno = Image.FromStream(fs);
+                            return;
+                        }
+                        catch { }
+                    }
                 }
             }
         }

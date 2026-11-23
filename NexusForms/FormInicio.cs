@@ -259,11 +259,23 @@ namespace NexusForms
             this.MaximizeBox = false;
             this.BackColor = Color.FromArgb(6, 10, 18);
 
-            string rutaFondo = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "fondo_nexus.jpg");
-            if (File.Exists(rutaFondo))
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string[] rutasFondo =
             {
-                this.BackgroundImage = Image.FromFile(rutaFondo);
-                this.BackgroundImageLayout = ImageLayout.Stretch;
+                Path.Combine(baseDir, "Assets", "fondo_nexus.jpg"),
+                Path.Combine(baseDir, "Assets", "fondo_nexus.png"),
+                Path.Combine(baseDir, "fondo_nexus.jpg")
+            };
+
+            foreach (string rutaFondo in rutasFondo)
+            {
+                if (File.Exists(rutaFondo))
+                {
+                    using var fs = new FileStream(rutaFondo, FileMode.Open, FileAccess.Read);
+                    this.BackgroundImage = Image.FromStream(fs);
+                    this.BackgroundImageLayout = ImageLayout.Stretch;
+                    break;
+                }
             }
 
             panelMenu = new Panel
