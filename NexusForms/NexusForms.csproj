@@ -10,17 +10,57 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="Assets\fondo_aether.jpg" />
+	  <None Remove="Assets\fondo_iris.jpg" />
+	  <None Remove="Assets\fondo_nebula.jpg" />
+	  <None Remove="Assets\fondo_void.jpg" />
+	  <None Remove="Assets\logo_nexus.jpg" />
+	  <None Remove="Assets\logo_nexus.png" />
+	  <None Remove="Assets\mapa_tactico_aether-4.jpg" />
+	  <None Remove="Assets\mapa_tactico_iris-07.jpg" />
+	  <None Remove="Assets\mapa_tactico_nebula-x9.jpg" />
+	  <None Remove="Assets\mapa_tactico_void-00.jpg" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Assets\fondo_aether.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\fondo_iris.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\fondo_nebula.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\fondo_void.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\logo_nexus.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\logo_nexus.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\mapa_tactico_aether-4.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\mapa_tactico_iris-07.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\mapa_tactico_nebula-x9.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\mapa_tactico_void-00.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
 	  <EmbeddedResource Include="FormJuego.resx" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="System.Speech" Version="9.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Update="Assets\logo_nexus.jpg">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
 	</ItemGroup>
 
 </Project>
