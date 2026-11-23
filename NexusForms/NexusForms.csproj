@@ -11,8 +11,11 @@
 
 	<ItemGroup>
 	  <None Remove="Assets\fondo_aether.jpg" />
+	  <None Remove="Assets\fondo_cabina.jpg" />
+	  <None Remove="Assets\fondo_combate.jpg" />
 	  <None Remove="Assets\fondo_iris.jpg" />
 	  <None Remove="Assets\fondo_nebula.jpg" />
+	  <None Remove="Assets\fondo_nexus.jpg" />
 	  <None Remove="Assets\fondo_void.jpg" />
 	  <None Remove="Assets\logo_nexus.jpg" />
 	  <None Remove="Assets\logo_nexus.png" />
@@ -20,16 +23,27 @@
 	  <None Remove="Assets\mapa_tactico_iris-07.jpg" />
 	  <None Remove="Assets\mapa_tactico_nebula-x9.jpg" />
 	  <None Remove="Assets\mapa_tactico_void-00.jpg" />
+	  <None Remove="Assets\musica.wav" />
+	  <None Remove="Assets\musica.wav.wav" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Content Include="Assets\fondo_aether.jpg">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="Assets\fondo_cabina.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\fondo_combate.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="Assets\fondo_iris.jpg">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="Assets\fondo_nebula.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\fondo_nexus.jpg">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="Assets\fondo_void.jpg">
@@ -51,6 +65,12 @@
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="Assets\mapa_tactico_void-00.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\musica.wav">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\musica.wav.wav">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	</ItemGroup>
