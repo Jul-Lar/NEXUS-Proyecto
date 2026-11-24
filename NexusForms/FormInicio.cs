@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace NexusForms
@@ -26,6 +27,18 @@ namespace NexusForms
         private ControlMando.EstadoMando mandoAnterior;
         private int contadorRepeticion = 0;
 
+        // --- MÓDULO DE RECONOCIMIENTO FACIAL BIOMÉTRICO ---
+        private Panel panelBiometria;
+        private PictureBox picCamara;
+        private Label lblEstadoBiometria;
+        private Button btnRegistrarRostro, btnAccesoFacial, btnDetenerCamara;
+        private ReconocimientoFacial escanerFacial = new ReconocimientoFacial();
+        private System.Windows.Forms.Timer timerCamara = new System.Windows.Forms.Timer();
+        private bool registrandoRostro = false;
+        private int muestrasCapturadas = 0;
+        private int framesCoincidencia = 0;
+        private string pilotoCandidato = "";
+
         public FormInicio()
         {
             InitializeComponent();
@@ -33,6 +46,7 @@ namespace NexusForms
             this.DoubleBuffered = true;
             AsistenteVozIA.Inicializar();
             ConstruirMenu();
+            ConstruirPanelBiometria();
             ConstruirPanelBaseDatos();
             IniciarLectorMandoMenu();
 
@@ -46,6 +60,8 @@ namespace NexusForms
             this.FormClosing += (s, e) =>
             {
                 timerMandoMenu?.Stop();
+                DetenerEscaneoBiometrico();
+                escanerFacial.Dispose();
                 AsistenteVozIA.Liberar();
             };
         }
@@ -131,6 +147,7 @@ namespace NexusForms
                     {
                         panelBaseDatos.Visible = false;
                         panelMenu.Visible = true;
+                        panelBiometria.Visible = true;
                         MoverFocoA(controlesNavegables.IndexOf(btnBaseDatos));
                     }
                     return;
@@ -142,6 +159,7 @@ namespace NexusForms
                     {
                         this.Activate();
                         panelMenu.Visible = true;
+                        panelBiometria.Visible = true;
                         MoverFocoA(controlesNavegables.IndexOf(btnIniciar));
                     }
                     else if (pulsaCirculo)
@@ -161,7 +179,9 @@ namespace NexusForms
 
                 if (pulsaCirculo)
                 {
+                    DetenerEscaneoBiometrico();
                     panelMenu.Visible = false;
+                    panelBiometria.Visible = false;
                     return;
                 }
 
@@ -241,10 +261,17 @@ namespace NexusForms
             Control activo = controlesNavegables[indiceFoco];
             if (luzMarcadorMenu != null)
             {
-                luzMarcadorMenu.Location = new Point(activo.Left - 10, activo.Top);
-                luzMarcadorMenu.Height = activo.Height;
-                luzMarcadorMenu.Visible = true;
-                luzMarcadorMenu.BringToFront();
+                if (activo.Parent == panelMenu)
+                {
+                    luzMarcadorMenu.Location = new Point(activo.Left - 10, activo.Top);
+                    luzMarcadorMenu.Height = activo.Height;
+                    luzMarcadorMenu.Visible = true;
+                    luzMarcadorMenu.BringToFront();
+                }
+                else
+                {
+                    luzMarcadorMenu.Visible = false;
+                }
             }
 
             activo.Focus();
@@ -281,7 +308,7 @@ namespace NexusForms
             panelMenu = new Panel
             {
                 Size = new Size(560, 625),
-                Location = new Point(220, 14),
+                Location = new Point(155, 14),
                 BackColor = Color.FromArgb(225, 10, 16, 28),
                 Visible = false
             };
@@ -462,6 +489,367 @@ namespace NexusForms
             };
         }
 
+        // --- CONSTRUCCIÓN DEL PANEL LATERAL DE RECONOCIMIENTO FACIAL ---
+        private void ConstruirPanelBiometria()
+        {
+            panelBiometria = new Panel
+            {
+                Size = new Size(245, 625),
+                Location = new Point(730, 14),
+                BackColor = Color.FromArgb(225, 10, 16, 28),
+                BorderStyle = BorderStyle.FixedSingle,
+                Visible = false
+            };
+
+            Label lblTituloBio = new Label
+            {
+                Text = "👁️ VISOR BIOMÉTRICO",
+                Font = new Font("Consolas", 11.5f, FontStyle.Bold),
+                ForeColor = Color.FromArgb(0, 255, 195),
+                Location = new Point(14, 15),
+                AutoSize = true
+            };
+
+            Label lblSubBio = new Label
+            {
+                Text = "ESCÁNER FACIAL NEXUS",
+                Font = new Font("Consolas", 8.5f),
+                ForeColor = Color.LightGray,
+                Location = new Point(15, 38),
+                AutoSize = true
+            };
+
+            picCamara = new PictureBox
+            {
+                Location = new Point(14, 65),
+                Size = new Size(215, 225),
+                BackColor = Color.FromArgb(6, 14, 24),
+                BorderStyle = BorderStyle.FixedSingle,
+                SizeMode = PictureBoxSizeMode.Zoom
+            };
+
+            lblEstadoBiometria = new Label
+            {
+                Text = "SENSOR EN ESPERA.\nRegistra tu rostro o inicia\nacceso mirando a la cámara.",
+                Font = new Font("Consolas", 8.5f, FontStyle.Bold),
+                ForeColor = Color.Cyan,
+                Location = new Point(14, 300),
+                Size = new Size(215, 62)
+            };
+
+            btnRegistrarRostro = new Button
+            {
+                Text = "📸 REGISTRAR ROSTRO",
+                Font = new Font("Consolas", 9.5f, FontStyle.Bold),
+                Location = new Point(14, 372),
+                Size = new Size(215, 44),
+                BackColor = Color.FromArgb(0, 120, 130),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
+            };
+            btnRegistrarRostro.Click += BtnRegistrarRostro_Click;
+
+            btnAccesoFacial = new Button
+            {
+                Text = "👁️ ACCESO BIOMÉTRICO",
+                Font = new Font("Consolas", 9.5f, FontStyle.Bold),
+                Location = new Point(14, 426),
+                Size = new Size(215, 48),
+                BackColor = Color.FromArgb(15, 135, 95),
+                ForeColor = Color.FromArgb(220, 255, 240),
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
+            };
+            btnAccesoFacial.Click += BtnAccesoFacial_Click;
+
+            btnDetenerCamara = new Button
+            {
+                Text = "⏹ APAGAR SENSOR",
+                Font = new Font("Consolas", 9f, FontStyle.Bold),
+                Location = new Point(14, 484),
+                Size = new Size(215, 36),
+                BackColor = Color.FromArgb(40, 48, 68),
+                ForeColor = Color.LightGray,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
+            };
+            btnDetenerCamara.Click += (s, e) => DetenerEscaneoBiometrico();
+
+            Label lblNotaBio = new Label
+            {
+                Text = "Tip: Escribe tu nombre a la\nizquierda antes de pulsar\n'Registrar Rostro'.",
+                Font = new Font("Consolas", 8f),
+                ForeColor = Color.Gold,
+                Location = new Point(14, 540),
+                Size = new Size(215, 65)
+            };
+
+            panelBiometria.Controls.AddRange(new Control[]
+            {
+                lblTituloBio, lblSubBio, picCamara, lblEstadoBiometria,
+                btnRegistrarRostro, btnAccesoFacial, btnDetenerCamara, lblNotaBio
+            });
+            this.Controls.Add(panelBiometria);
+
+            controlesNavegables.Add(btnRegistrarRostro); // 11
+            controlesNavegables.Add(btnAccesoFacial);    // 12
+            controlesNavegables.Add(btnDetenerCamara);   // 13
+
+            timerCamara.Interval = 33;
+            timerCamara.Tick += TimerCamara_Tick;
+        }
+
+        private void BtnRegistrarRostro_Click(object? sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtNombre.Text))
+            {
+                MostrarAlertaNexus(
+                    "NEXUS // BIOMETRÍA",
+                    "NOMBRE DE PILOTO REQUERIDO",
+                    "Escribe primero tu nombre de Comandante a la izquierda antes de registrar tu rostro.",
+                    Color.Gold
+                );
+                return;
+            }
+
+            if (!escanerFacial.IniciarCamara())
+            {
+                MostrarAlertaNexus(
+                    "NEXUS // ERROR DE SENSOR",
+                    "CÁMARA WEB NO DETECTADA",
+                    "No se encontró ninguna cámara web activa en esta PC.\nConecta una cámara o verifica los permisos de Windows.",
+                    Color.OrangeRed
+                );
+                return;
+            }
+
+            registrandoRostro = true;
+            muestrasCapturadas = 0;
+            lblEstadoBiometria.ForeColor = Color.FromArgb(0, 255, 195);
+            lblEstadoBiometria.Text = $"CAPTURANDO ROSTRO DE:\n{txtNombre.Text.Trim().ToUpper()} (0/15)...";
+            AsistenteVozIA.ResponderConVoz("Iniciando registro biométrico. Mira fijamente al escáner.");
+            timerCamara.Start();
+        }
+
+        private void BtnAccesoFacial_Click(object? sender, EventArgs e)
+        {
+            if (!escanerFacial.IniciarCamara())
+            {
+                MostrarAlertaNexus(
+                    "NEXUS // ERROR DE SENSOR",
+                    "CÁMARA WEB NO DETECTADA",
+                    "No se encontró ninguna cámara web activa en esta PC.\nConecta una cámara o verifica los permisos de Windows.",
+                    Color.OrangeRed
+                );
+                return;
+            }
+
+            registrandoRostro = false;
+            framesCoincidencia = 0;
+            pilotoCandidato = "";
+            lblEstadoBiometria.ForeColor = Color.Cyan;
+            lblEstadoBiometria.Text = "ESCANEANDO ROSTRO...\nMira a la cámara para entrar.";
+            AsistenteVozIA.ResponderConVoz("Escáner facial activado.");
+            timerCamara.Start();
+        }
+
+        private void DetenerEscaneoBiometrico()
+        {
+            timerCamara.Stop();
+            escanerFacial.DetenerCamara();
+            registrandoRostro = false;
+            if (picCamara != null)
+            {
+                picCamara.Image?.Dispose();
+                picCamara.Image = null;
+            }
+            if (lblEstadoBiometria != null)
+            {
+                lblEstadoBiometria.ForeColor = Color.Cyan;
+                lblEstadoBiometria.Text = "SENSOR EN ESPERA.\nRegistra tu rostro o inicia\nacceso mirando a la cámara.";
+            }
+        }
+
+        private void TimerCamara_Tick(object? sender, EventArgs e)
+        {
+            var (frameVisual, detectado, piloto, similitud, rostroMat) = escanerFacial.ProcesarFrame(registrandoRostro);
+
+            if (frameVisual != null)
+            {
+                picCamara.Image?.Dispose();
+                picCamara.Image = frameVisual;
+            }
+
+            if (detectado && rostroMat != null)
+            {
+                using (rostroMat)
+                {
+                    if (registrandoRostro)
+                    {
+                        muestrasCapturadas++;
+                        escanerFacial.GuardarMuestraRostro(txtNombre.Text, rostroMat, muestrasCapturadas);
+                        lblEstadoBiometria.Text = $"CAPTURANDO BIOMETRÍA...\nMuestras: {muestrasCapturadas} / 15";
+
+                        if (muestrasCapturadas >= 15)
+                        {
+                            string nombreRegistrado = txtNombre.Text.Trim();
+                            DetenerEscaneoBiometrico();
+                            lblEstadoBiometria.ForeColor = Color.LimeGreen;
+                            lblEstadoBiometria.Text = $"✔ ROSTRO REGISTRADO:\n{nombreRegistrado.ToUpper()}";
+                            AsistenteVozIA.ResponderConVoz($"Biometría vinculada para {nombreRegistrado}.");
+
+                            MostrarAlertaNexus(
+                                "NEXUS // ACCESO VINCULADO",
+                                $"✔ BIOMETRÍA ACTIVA: {nombreRegistrado.ToUpper()}",
+                                "Tus rasgos faciales han sido guardados en el núcleo.\nAhora puedes entrar mirando a la cámara con 'ACCESO BIOMÉTRICO'.",
+                                Color.FromArgb(0, 255, 195)
+                            );
+                        }
+                    }
+                    else
+                    {
+                        if (similitud >= 0.72 && !string.IsNullOrEmpty(piloto))
+                        {
+                            if (piloto == pilotoCandidato) framesCoincidencia++;
+                            else { pilotoCandidato = piloto; framesCoincidencia = 1; }
+
+                            int progreso = Math.Min(100, (framesCoincidencia * 100) / 30);
+                            lblEstadoBiometria.ForeColor = Color.FromArgb(0, 255, 195);
+                            lblEstadoBiometria.Text = $"PILOTO: {piloto.ToUpper()}\nVERIFICANDO ACCESO: {progreso}%";
+
+                            if (framesCoincidencia >= 30)
+                            {
+                                string pilotoAutorizado = pilotoCandidato;
+                                DetenerEscaneoBiometrico();
+                                DesbloquearAccesoPorRostro(pilotoAutorizado);
+                            }
+                        }
+                        else
+                        {
+                            framesCoincidencia = 0;
+                            lblEstadoBiometria.ForeColor = Color.Gold;
+                            lblEstadoBiometria.Text = "ROSTRO DETECTADO...\nBuscando coincidencia en BD...";
+                        }
+                    }
+                }
+            }
+        }
+
+        private void DesbloquearAccesoPorRostro(string nombrePiloto)
+        {
+            txtNombre.Text = nombrePiloto;
+            AsistenteVozIA.ResponderConVoz($"Acceso concedido. Bienvenido Comandante {nombrePiloto}.");
+
+            // Si ya existe una partida guardada con ese nombre de piloto, la carga automáticamente
+            var partidaExistente = GestorGuardado.ObtenerTodas()
+                .FirstOrDefault(p => p.Nombre.Equals(nombrePiloto, StringComparison.OrdinalIgnoreCase));
+
+            if (partidaExistente != null)
+            {
+                Jugador jGuardado = GestorGuardado.ConvertirAJugador(partidaExistente);
+                AbrirCabina(jGuardado);
+            }
+            else
+            {
+                // Si es la primera vez que entra tras registrar su cara, inicia nueva partida con su nombre
+                btnIniciar.PerformClick();
+            }
+        }
+
+        private void MostrarAlertaNexus(string titulo, string subtitulo, string mensaje, Color colorNeon)
+        {
+            using Form modal = new Form
+            {
+                Size = new Size(490, 240),
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.None,
+                BackColor = Color.FromArgb(10, 18, 32),
+                ShowInTaskbar = false,
+                KeyPreview = true
+            };
+
+            modal.Paint += (s, e) =>
+            {
+                using Pen penExterno = new Pen(colorNeon, 2.5f);
+                using Pen penInterno = new Pen(Color.FromArgb(70, colorNeon), 1f);
+                e.Graphics.DrawRectangle(penExterno, 1, 1, modal.Width - 3, modal.Height - 3);
+                e.Graphics.DrawRectangle(penInterno, 6, 6, modal.Width - 13, modal.Height - 13);
+            };
+
+            Panel barraSuperior = new Panel
+            {
+                Location = new Point(2, 2),
+                Size = new Size(modal.Width - 4, 34),
+                BackColor = Color.FromArgb(18, 32, 54)
+            };
+
+            Label lblTitulo = new Label
+            {
+                Text = $"◈ {titulo.ToUpper()}",
+                Font = new Font("Consolas", 10f, FontStyle.Bold),
+                ForeColor = colorNeon,
+                Location = new Point(12, 8),
+                AutoSize = true
+            };
+            barraSuperior.Controls.Add(lblTitulo);
+
+            Label lblSub = new Label
+            {
+                Text = subtitulo.ToUpper(),
+                Font = new Font("Consolas", 11.5f, FontStyle.Bold),
+                ForeColor = Color.White,
+                Location = new Point(22, 50),
+                AutoSize = true
+            };
+
+            Label lblCuerpo = new Label
+            {
+                Text = mensaje,
+                Font = new Font("Consolas", 9.5f),
+                ForeColor = Color.LightGray,
+                Location = new Point(22, 82),
+                Size = new Size(445, 78)
+            };
+
+            Button btnOk = new Button
+            {
+                Text = "✔ ENTENDIDO [ENTER / X]",
+                Font = new Font("Consolas", 10f, FontStyle.Bold),
+                Location = new Point(125, 172),
+                Size = new Size(240, 42),
+                BackColor = Color.FromArgb(0, 125, 115),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
+            };
+            btnOk.FlatAppearance.BorderColor = colorNeon;
+            btnOk.FlatAppearance.BorderSize = 2;
+            btnOk.Click += (s, e) => modal.Close();
+
+            modal.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter || e.KeyCode == Keys.Escape || e.KeyCode == Keys.Space)
+                    modal.Close();
+            };
+
+            System.Windows.Forms.Timer timerModalMando = new System.Windows.Forms.Timer { Interval = 30 };
+            timerModalMando.Tick += (s, e) =>
+            {
+                var m = ControlMando.Leer();
+                if (m.BotonSaltar || m.BotonDisparar)
+                {
+                    timerModalMando.Stop();
+                    modal.Close();
+                }
+            };
+            modal.FormClosed += (s, e) => timerModalMando.Dispose();
+            timerModalMando.Start();
+
+            modal.Controls.AddRange(new Control[] { barraSuperior, lblSub, lblCuerpo, btnOk });
+            modal.ShowDialog(this);
+        }
+
         private void ConstruirPanelBaseDatos()
         {
             panelBaseDatos = new Panel
@@ -550,6 +938,7 @@ namespace NexusForms
             {
                 panelBaseDatos.Visible = false;
                 panelMenu.Visible = true;
+                panelBiometria.Visible = true;
                 MoverFocoA(controlesNavegables.IndexOf(btnBaseDatos));
             };
 
@@ -564,8 +953,10 @@ namespace NexusForms
 
         private void AbrirBaseDeDatos()
         {
+            DetenerEscaneoBiometrico();
             RefrescarListaPartidas();
             panelMenu.Visible = false;
+            panelBiometria.Visible = false;
             panelBaseDatos.Visible = true;
             panelBaseDatos.BringToFront();
             lstPartidas.Focus();
@@ -590,13 +981,19 @@ namespace NexusForms
         {
             if (lstPartidas.SelectedItem is not RegistroPartida reg)
             {
-                MessageBox.Show("Selecciona primero una partida de la lista.", "NEXUS // BASE DE DATOS");
+                MostrarAlertaNexus(
+                    "NEXUS // BASE DE DATOS",
+                    "NINGÚN REGISTRO SELECCIONADO",
+                    "Selecciona primero una partida de la lista antes de continuar.",
+                    Color.Gold
+                );
                 return;
             }
 
             Jugador j = GestorGuardado.ConvertirAJugador(reg);
             panelBaseDatos.Visible = false;
             panelMenu.Visible = true;
+            panelBiometria.Visible = true;
             AbrirCabina(j);
         }
 
@@ -623,7 +1020,7 @@ namespace NexusForms
                 {
                     if (!this.IsDisposed)
                         this.BeginInvoke(new Action(() =>
-                            MessageBox.Show(mensajeError, "NEXUS // VOZ")));
+                            MostrarAlertaNexus("NEXUS // VOZ", "AVISO DEL SISTEMA DE VOZ", mensajeError, Color.Cyan)));
                 }
             );
         }
@@ -658,6 +1055,7 @@ namespace NexusForms
 
         private void AbrirCabina(Jugador jugador)
         {
+            DetenerEscaneoBiometrico();
             timerMandoMenu.Stop();
             this.Hide();
             using (FormJuego cabina = new FormJuego(jugador, ObtenerVelocidadMs()))

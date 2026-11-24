@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Speech.Recognition;
 using System.Speech.Synthesis;
 using System.Threading.Tasks;
@@ -66,6 +67,11 @@ namespace NexusForms
                     reconocedor = new SpeechRecognitionEngine(cultura);
                     reconocedor.SetInputToDefaultAudioDevice();
 
+                    reconocedor.BabbleTimeout = TimeSpan.FromSeconds(2.0);
+                    reconocedor.InitialSilenceTimeout = TimeSpan.FromSeconds(4.5);
+                    reconocedor.EndSilenceTimeout = TimeSpan.FromSeconds(0.9);
+                    reconocedor.EndSilenceTimeoutAmbiguous = TimeSpan.FromSeconds(1.1);
+
                     Choices nombres = new Choices(new string[]
                     {
                         "Julio", "Diego", "Carlos", "Luis", "Juan", "Pedro", "Miguel", "José", "Andrés",
@@ -75,33 +81,45 @@ namespace NexusForms
                         "Comandante", "Capitán", "Explorador", "Nexus", "Valkyrie", "Nova", "Kaelen"
                     });
 
-                    GrammarBuilder gbNombres = new GrammarBuilder(nombres) { Culture = cultura };
-                    reconocedor.LoadGrammar(new Grammar(gbNombres) { Weight = 0.8f });
-                    reconocedor.LoadGrammar(new DictationGrammar() { Weight = 0.4f });
+                    Choices apellidosORangos = new Choices(new string[]
+                    {
+                        "Lara", "García", "Rodríguez", "Martínez", "López", "González", "Pérez", "Sánchez",
+                        "Ramírez", "Torres", "Flores", "Rivera", "Gómez", "Díaz", "Reyes", "Morales",
+                        "Cruz", "Ortiz", "Gutiérrez", "Chávez", "Ramos", "Vargas", "Castillo", "Mendoza",
+                        "Alvarez", "Fernández", "Romero", "Herrera", "Medina", "Aguilar", "Rojas", "Silva",
+                        "Alfa", "Omega", "Prime", "Cero", "Uno", "Élite"
+                    });
 
-                    reconocedor.BabbleTimeout = TimeSpan.FromSeconds(1.5);
-                    reconocedor.InitialSilenceTimeout = TimeSpan.FromSeconds(4);
-                    reconocedor.EndSilenceTimeout = TimeSpan.FromSeconds(1.0);
+                    // 1. Gramática de 1 palabra (ej: "Julio" o "Comandante")
+                    GrammarBuilder gbNombreSolo = new GrammarBuilder(nombres) { Culture = cultura };
+                    reconocedor.LoadGrammar(new Grammar(gbNombreSolo) { Weight = 1.0f });
+
+                    // 2. Gramática de 2 palabras (ej: "Julio Lara" o "Comandante Julio")
+                    GrammarBuilder gbNombreCompleto = new GrammarBuilder { Culture = cultura };
+                    gbNombreCompleto.Append(nombres);
+                    gbNombreCompleto.Append(apellidosORangos);
+                    reconocedor.LoadGrammar(new Grammar(gbNombreCompleto) { Weight = 0.95f });
+
+                    // 3. Dictado libre de respaldo con bajo peso (sin Priority, ya que Windows no lo permite en DictationGrammar)
+                    reconocedor.LoadGrammar(new DictationGrammar() { Weight = 0.25f });
 
                     RecognitionResult? resultado = reconocedor.Recognize(TimeSpan.FromSeconds(5));
 
-                    if (resultado != null && !string.IsNullOrWhiteSpace(resultado.Text))
+                    if (resultado != null && !string.IsNullOrWhiteSpace(resultado.Text) && resultado.Confidence >= 0.42f)
                     {
-                        string texto = resultado.Text.Trim().TrimEnd('.', ',');
-                        if (texto.Length > 0)
-                            texto = char.ToUpper(texto[0]) + texto.Substring(1);
+                        string texto = CapitalizarPalabras(resultado.Text.Trim().TrimEnd('.', ',', ';', '!', '?'));
 
                         alRecibirTexto(texto);
                         ResponderConVoz($"Bienvenido a Nexus, {texto}.");
                     }
                     else
                     {
-                        ResponderConVoz("No detecté ningún nombre. Intenta de nuevo.");
+                        ResponderConVoz("No escuché con claridad. Acércate al micrófono e intenta de nuevo.");
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    alError?.Invoke("Verifica que el micrófono de tu PC esté conectado y habilitado en Windows.");
+                    alError?.Invoke($"Detalle técnico del sensor: {ex.Message}");
                 }
                 finally
                 {
@@ -109,6 +127,14 @@ namespace NexusForms
                     alCambiarEstado?.Invoke("🎤 VOZ", false);
                 }
             });
+        }
+
+        private static string CapitalizarPalabras(string entrada)
+        {
+            if (string.IsNullOrWhiteSpace(entrada)) return entrada;
+            var palabras = entrada.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => char.ToUpper(p[0]) + (p.Length > 1 ? p.Substring(1).ToLower() : ""));
+            return string.Join(" ", palabras);
         }
 
         public static void ActivarEscuchaPorMando()
@@ -142,8 +168,8 @@ namespace NexusForms
                     });
 
                     GrammarBuilder gbComandos = new GrammarBuilder(comandosRapidos) { Culture = cultura };
-                    reconocedor.LoadGrammar(new Grammar(gbComandos));
-                    reconocedor.LoadGrammar(new DictationGrammar());
+                    reconocedor.LoadGrammar(new Grammar(gbComandos) { Weight = 0.9f });
+                    reconocedor.LoadGrammar(new DictationGrammar() { Weight = 0.3f });
 
                     reconocedor.InitialSilenceTimeout = TimeSpan.FromSeconds(4);
                     reconocedor.EndSilenceTimeout = TimeSpan.FromSeconds(1.2);
