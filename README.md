@@ -1,46 +1,26 @@
-# NEXUS - Simulador de Exploración Espacial
+# NEXUS v3 — Simulador de Exploración Espacial y Memoria Persistente
 
-## 📌 Propósito del Juego
-**NEXUS** es un videojuego de exploración espacial táctico y gestión de recursos en 2D desarrollado en C# con Windows Forms y persistencia de datos en SQL Server. El jugador toma el control de una nave exploradora y su tripulación para investigar sectores desconocidos, administrar un suministro crítico de energía, gestionar un inventario de recursos y completar misiones de alta prioridad.
+Videojuego desarrollado en **C# (Windows Forms)** con persistencia relacional en **SQL Server** mediante **ADO.NET**[cite: 1, 3, 4].
 
-Este proyecto representa la evolución técnica y conceptual de la base de código desarrollada originalmente durante la etapa H3.
+## 📁 Estructura del Repositorio
 
----
+* `NexusForms/` y `mision1 nexus/`: Código fuente en C#, formularios Windows Forms (`FormIntro`, `FormInicio`, `FormJuego`, modos `1945`, `Metal Slug` y `2.5D`), motor lógico (`NexusMotor.cs`) y acceso a datos (`GestorGuardado.cs`)[cite: 2, 3, 4].
+* `Database/`: Script SQL completo para reconstruir la base de datos (`01_NEXUS_DB_Completa.sql`).
+* `docs/`: Diagrama Entidad-Relación (`DER_NEXUS.png`), documentación técnica y evidencias de pruebas[cite: 2, 7].
 
-## 🚀 Funcionalidades Implementadas y Propuestas
+## ⚙️ Requisitos Previos
 
-* **Exploración por Sectores:** Mapa estelar interactivo en cuadrícula con consumo dinámico de energía por movimiento.
-* **Gestión de Exploradores e Inventario:** Control de salud, roles de tripulación y almacenamiento de ítems consumibles y herramientas.
-* **Resolución de Misiones:** Eventos interactivos en el espacio con requisitos específicos y recompensas de recursos.
-* **Persistencia de Partidas:** Sistema completo de guardado y carga de partidas mediante almacenamiento relacional en SQL Server.
-* **Arquitectura en 3 Capas:** Separación limpia entre la Interfaz de Usuario (Presentation), la Lógica del Juego (Business) y el Acceso a Datos (Data Access).
+* Windows 10/11 con **.NET Desktop Runtime / .NET Framework** instalado.
+* **Microsoft SQL Server** y SQL Server Management Studio (SSMS).
+* Visual Studio 2022 (solo para compilar desde el código fuente).
 
----
+## 🚀 Instalación y Ejecución desde Cero (Clonación Limpia)
 
-## 🛠️ Tecnologías Utilizadas
+### 1. Reconstruir la Base de Datos en SQL Server
+1. Abre **SQL Server Management Studio (SSMS)** y conéctate a tu instancia local (ej. `localhost` o `.\SQLEXPRESS`).
+2. Abre y ejecuta el archivo `Database/01_NEXUS_DB_Completa.sql` para crear automáticamente la base de datos `NEXUS_DB`, las 5 tablas relacionales (`Jugadores`, `Naves`, `Partidas`, `InventarioPartida`, `EstadoMisionPartida`) y los registros iniciales[cite: 4].
 
-* **Lenguaje:** C# (.NET Framework / .NET Core)
-* **Interfaz Gráfica:** Windows Forms (WinForms)
-* **Base de Datos:** Microsoft SQL Server
-* **Acceso a Datos:** ADO.NET / Dapper
-* **Control de Versiones:** Git & GitHub
-
----
-
-## 📁 Documentación del Proyecto
-
-Toda la documentación técnica y de diseño requerida para la evolución de NEXUS se encuentra en la carpeta [`docs/`](./docs/):
-
-* 📄 [`docs/diseno-del-juego.md`](./docs/diseno-del-juego.md): Visión, ciclo de juego, mecánicas, diseño de pantallas (wireframes), experiencia de usuario y alcance.
-* 📄 [`docs/arquitectura-actual.md`](./docs/arquitectura-actual.md): Análisis de clases, funcionalidades y limitaciones de la versión inicial (H3).
-* 📄 [`docs/arquitectura-propuesta.md`](./docs/arquitectura-propuesta.md): Modelo detallado de la arquitectura en 3 capas con diagramas explicativos.
-* 📄 [`docs/modelo-de-datos-propuesto.md`](./docs/modelo-de-datos-propuesto.md): Modelo ER, diseño de tablas en SQL Server y relaciones para el guardado de partidas.
-* 📄 [`docs/analisis-tecnico.md`](./docs/analisis-tecnico.md): Evaluación de alternativas técnicas, justificación de tecnologías y verificación de fuentes/IA.
-
----
-
-## ⚙️ Cómo Ejecutar el Proyecto
-
-1. **Clonar el repositorio:**
+### 2. Configurar la Cadena de Conexión y Compilar
+1. Clona el repositorio:
    ```bash
-   git clone https://github.com/Jul-Lar/NEXUS-Proyecto.git
+   git clone [https://github.com/Jul-Lar/NEXUS-Proyecto.git](https://github.com/Jul-Lar/NEXUS-Proyecto.git)
