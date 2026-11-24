@@ -18,3 +18,4 @@
   * **Defecto detectado / comportamiento:** Al intentar consultar o guardar partidas sin conexión activa, se captura `SqlException` dentro de los bloques `try-catch` de `GestorGuardado`.
   * **Corrección / Validación:** Se verificó el método `GestorGuardado.ProbarConexion(out string mensajeError)` para diagnosticar el estado de la conexión antes de operar y evitar el cierre abrupto de la aplicación.
   * **Estado:** Corregido y verificado.
+  * Validación final de integración completada en rama testing-debugging.
